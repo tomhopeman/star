@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webside.gtype.mapper.GTypeMapper">
+	<!--mybatis ehcache缓存配置,以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 -->
+	<cache type="org.mybatis.caches.ehcache.LoggingEhcache"/> 
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+
+	<sql id="gTypeAttributes">
+		 gt_id,
+	 	 gt_name,
+	 	 gt_status,
+	 	 gt_type
+	</sql>
+
+	<resultMap id="gTypeMap" type="com.webside.gtype.model.GTypeEntity">
+		<id property="id" column="gt_id"/>
+		<result property="gtName" column="gt_name" />
+		<result property="gtStatus" column="gt_status"/>
+		<result property="gtType" column="gt_type"/>
+		<collection property="teamList" column="id" ofType="com.webside.gtype.model.TeamEntity">
+		    <id property="id" column="t_id"/>
+			<result property="tName" column="t_name" />
+			<result property="tLogo" column="t_logo"/>
+			<result property="tRemark" column="t_remark"/>
+			<result property="tAgenda" column="t_agenda"/>
+			<result property="tStatus" column="t_status"/>
+		</collection>
+	</resultMap>
+	
+	<select id="queryListByPage" parameterType="map" resultMap="gTypeMap" flushCache="true" useCache="true">
+		SELECT gt.gt_id,
+	 	       gt.gt_name,
+	 	       gt.gt_status,
+	 	       gt.gt_type
+		FROM tb_game_type gt
+		WHERE gt.gt_status != 0
+	</select>
+	
+	<select id="findById" parameterType="long" resultMap="gTypeMap" flushCache="true" useCache="true">
+		SELECT gt.gt_id,
+	 	       gt.gt_name,
+	 	       gt.gt_status,
+	 	       gt.gt_type
+		FROM tb_game_type gt
+		WHERE gt.gt_id = ${id}
+	</select>
+	
+	<insert id="insert" parameterType="com.webside.user.model.UserEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_game_type (
+			gt_name,
+			gt_status,
+			gt_type
+			)   
+		values (
+			#{gtName},
+			2,
+			1
+			)  
+	</insert>
+	
+	<update id="update" parameterType="com.webside.gtype.model.GTypeEntity" flushCache="true">
+		update tb_game_type
+		<trim prefix="SET" suffixOverrides=",">   
+			<if test="gtName != null and gtName != ''">
+				gt_name = #{gtName},
+			</if>
+			<if test="gtStatus != null">
+				gt_status = #{gtStatus},
+			</if>
+		</trim>		
+		WHERE gt_id = ${id}
+	</update>
+</mapper>

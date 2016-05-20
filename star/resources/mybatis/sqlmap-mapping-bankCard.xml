@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webside.bankCard.mapper.BankCardMapper">
+	<!--mybatis ehcache缓存配置,以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 -->
+	<cache type="org.mybatis.caches.ehcache.LoggingEhcache"/> 
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+
+	<sql id="bankCardAttributes">
+		bc_id,
+		m_id,
+		bc_no,
+		bc_name,
+		bc_province,
+		bc_city,
+		bc_bank,
+		bc_bindtime,
+		bc_status,
+		m_phone
+	</sql>
+
+	<resultMap id="bankCardMap" type="com.webside.bankCard.model.BankCardEntity">
+		<id property="id" column="bc_id"/>
+		<result property="mId" column="m_id" />
+		<result property="bcNo" column="bc_no"/>
+		<result property="bcName" column="bc_name"/>
+		<result property="bcProvince" column="bc_province"/>
+		<result property="bcCity" column="bc_city"/>
+		<result property="bcBank" column="bc_bank"/>
+		<result property="bcBindtime" column="bc_bindtime"/>
+		<result property="bcStatus" column="bc_status"/>
+		<result property="accountName" column="m_account_name"/>
+		<result property="memName" column="m_name"/>
+		<result property="memPhone" column="m_phone"/>
+	</resultMap>
+	
+	<select id="queryListByPage" parameterType="map" resultMap="bankCardMap" flushCache="true" useCache="true">
+		<!-- 
+			偏移offset较小的时候，直接使用limit较优；
+			偏移offset较大的时候，使用下面子查询的方式较优；
+			具体可以根据业务情况选择 
+		-->
+		<!-- 
+		select <include refid="userAttributes" /> from tb_user Where u_id >=(
+		select u_id from tb_user order by u_id limit ${start},1
+		) limit ${pageNumber}
+		 -->
+		SELECT 
+		bc.bc_id,
+		bc.bc_no,
+		bc.bc_name,
+		bc.bc_bank,
+		bc.m_id,
+		m.m_account_name,
+		m.m_name,
+		m.m_phone,
+		bc.bc_province,
+		bc.bc_city,
+		bc.bc_bindtime,
+		bc.bc_status
+		FROM tb_bankcard bc LEFT JOIN tb_member m ON bc.m_id=m.m_id WHERE 1=1
+		<if test="bc_id != null and bc_id != ''">
+			AND bc.bc_id like CONCAT('%',#{bc_id},'%')
+		</if>
+		<if test="bc_no != null and bc_no != ''">
+			AND bc.bc_no like CONCAT('%',#{bc_no},'%')
+		</if>
+		<if test="bc_name != null and bc_name != ''">
+			AND bc.bc_name like CONCAT('%',#{bc_name},'%')
+		</if>
+		<if test="m_id != null and m_id != ''">
+			AND m.m_id like CONCAT('%',#{m_id},'%')
+		</if>
+		<if test="m_accountName != null and m_accountName != ''">
+			AND m.m_account_name like CONCAT('%',#{m_accountName},'%')
+		</if>
+		<if test="m_name != null and m_name != ''">
+			AND m.m_name like CONCAT('%',#{m_name},'%')
+		</if>
+		<if test="m_phone != null and m_phone != ''">
+			AND m.m_phone like CONCAT('%',#{m_phone},'%')
+		</if>
+		<if test="bc_status != null and bc_status != ''">
+			AND bc.bc_status = #{bc_status}
+		</if>
+		<if test="bindtimeStart != null and bindtimeStart != ''">
+			AND bc.bc_bindtime &gt;=  CONCAT(#{bindtimeStart},' 00:00:00')
+		</if>
+		<if test="bindtimeEnd != null and bindtimeEnd != ''">
+			AND bc.bc_bindtime &lt;= CONCAT(#{bindtimeEnd},' 23:59:59')
+		</if>
+	</select>
+	
+	<select id="queryTotalBankCard" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		
+		SELECT
+		COUNT(*) count
+		FROM tb_bankcard
+		
+	</select>
+	
+	<select id="queryTotalBingdingMember" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		
+		SELECT
+		COUNT(DISTINCT m_id) count
+		FROM tb_bankcard
+		
+	</select>
+</mapper>

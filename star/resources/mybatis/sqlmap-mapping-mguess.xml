@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.webside.mguess.mapper.MGuessMapper">
+	<!--mybatis ehcache缓存配置,以下两个<cache>标签二选一,第一个可以输出日志,第二个不输出日志 -->
+	<cache type="org.mybatis.caches.ehcache.LoggingEhcache"/> 
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache"/> -->
+
+	<sql id="mGuessAttributes">
+		 mg_id,
+	 	 gp_id,
+	 	 mg_time,
+	 	 mg_bi_pledge,
+	 	 mg_bi_award,
+	 	 mg_bi_man,
+	 	 mg_predict_result,
+	 	 mg_result
+	</sql>
+
+	<sql id="guessProjectAttributes">
+		gp_id,
+		gt_id,
+		gp_name,
+		gp_teamA,
+		gp_teamA_name,
+		gp_teamB,
+		gp_teamB_name,
+		gp_game_star,
+		gp_game_end,
+		gp_close_time,
+		gp_base_number,
+		gp_multiple,
+		gp_hide,
+		gp_status,
+		gp_if_recommend,
+		gp_win_A,
+		gp_win_B,
+		gp_dogfall,
+		gp_manfee_ratio
+
+	</sql>
+
+	<resultMap id="mGuessMap" type="com.webside.mguess.model.MGuessEntity">
+		<id property="id" column="mg_id"/>
+		<result property="gpId" column="gp_id" />
+		<result property="mgTime" column="mg_time"/>
+		<result property="mgBiPledge" column="mg_bi_pledge"/>
+		<result property="mgBiAward" column="mg_bi_award"/>
+		<result property="mgBiMan" column="mg_bi_man"/>
+		<result property="mgPredictResult" column="mg_predict_result"/>
+		<result property="mgResult" column="mg_result"/>
+		<association property="guessProject" column="id" javaType="com.webside.mguess.model.GuessProjectEntity">
+			<id property="id" column="gp_id"/>
+			<result property="gtId" column="gt_id"/>
+			<result property="gpName" column="gp_name"/>
+			<result property="gpTeamA" column="gp_teamA"/>
+			<result property="gpTeamAName" column="gp_teamA_name"/>
+			<result property="gpTeamB" column="gp_teamB"/>
+			<result property="gpTeamBName" column="gp_teamB_name"/>
+			<result property="gpGameStar" column="gp_game_star"/>
+			<result property="gpGameEnd" column="gp_game_end"/>
+			<result property="gpCloseTime" column="gp_close_time"/>
+			<result property="gpBaseNumber" column="gp_base_number"/>
+			<result property="gpMultiple" column="gp_multiple"/>
+			<result property="gpHide" column="gp_hide"/>
+			<result property="gpStatus" column="gp_status"/>
+			<result property="gpIfRecommend" column="gp_if_recommend"/>
+			<result property="gpWinA" column="gp_win_A"/>
+			<result property="gpWinB" column="gp_win_B"/>
+			<result property="gpDogfall" column="gp_dogfall"/>
+			<result property="gpManfeeRatio" column="gp_manfee_ratio"/>
+		</association>
+		<association property="guessProjectInfo" column="id" javaType="com.webside.mguess.model.GuessProjectInfoEntity">
+			<id property="id" column="gp_id"/>
+			<result property="gpResult" column="gp_result"/>
+			<result property="gpGoalA" column="gp_goal_A"/>
+			<result property="gpGoalB" column="gp_goal_B"/>
+			<result property="biPledgeTotal" column="bi_pledge_total"/>
+			<result property="biPledgeTotal" column="bi_pledge_total"/>
+			<result property="biAwardTotal" column="bi_award_total"/>
+		</association>
+		
+		<association property="member" column="id" javaType="com.webside.member.model.MemberEntity">
+			<id property="id" column="m_id"/>
+			<result property="mAccountName" column="m_account_name" />
+			<result property="mPassword" column="m_password"/>
+			<result property="mName" column="m_name"/>
+			<result property="mEmail" column="m_email"/>
+			<result property="mPhone" column="m_phone"/>
+			<result property="mRegTime" column="m_reg_time"/>
+			<result property="mStatus" column="m_status"/>
+			<result property="mIsNew" column="m_is_new"/>
+			<result property="mCredentialsSalt" column="m_credentials_salt"/>
+			<result property="mBcBind" column="m_bc_bind"/>
+		</association>
+	</resultMap>
+	
+	<select id="queryListByPage" parameterType="map" resultMap="mGuessMap" flushCache="true" useCache="true">
+		SELECT mg.mg_id,
+		       mg.m_id,
+	 	       mg.gp_id,
+	 	       mg.mg_time,
+	 	       mg.mg_bi_pledge,
+	 	       mg.mg_bi_award,
+	 	       mg.mg_bi_man,
+	 	       mg.mg_predict_result,
+	 	       mg.mg_result,
+               gp.gp_id,
+		       gp.gt_id,
+		       gp.gp_name,
+		       gp.gp_teamA,
+		       gp.gp_teamA_name,
+		       gp.gp_teamB,
+		       gp.gp_teamB_name,
+		       gp.gp_game_star,
+		       gp.gp_game_end,
+		       gp.gp_close_time,
+		       gp.gp_base_number,
+		       gp.gp_multiple,
+		       gp.gp_hide,
+		       gp.gp_status,
+		       gp.gp_if_recommend,
+		       gp.gp_win_A,
+		       gp.gp_win_B,
+		       gp.gp_dogfall,
+		       gp.gp_manfee_ratio,
+		       m.m_id,
+               m.m_account_name,
+               gpi.gp_result,
+               gpi.gp_goal_A,
+               gpi.gp_goal_B,
+               gpi.bi_pledge_total,
+               gpi.bi_man_total,
+               gpi.bi_award_total
+		FROM tb_mb_guess mg 
+		LEFT JOIN tb_guess_project gp ON mg.gp_id = gp.gp_id
+		LEFT JOIN tb_guess_project_info gpi ON mg.gp_id = gpi.gp_id
+		LEFT JOIN tb_member m ON mg.m_id = m.m_id
+		<trim prefix="WHERE" suffixOverrides="AND">  
+			<if test="id != null and id != ''">
+				mg.mg_id=#{id} AND
+			</if>
+			<if test="gpId != null and gpId != ''">
+				mg.gp_id=#{gpId} AND
+			</if>
+			<if test="gpName != null and gpName != ''">
+				gp.gp_name LIKE CONCAT(CONCAT('%', #{gpName}), '%') AND
+			</if>
+			<if test="starGameDate != null and starGameDate != ''">
+				gp.gp_game_star<![CDATA[>=]]>#{starGameDate} AND
+			</if>
+			<if test="endGameDate != null and endGameDate != ''">
+				gp.gp_game_star<![CDATA[<=]]>#{endGameDate} AND
+			</if>
+			<if test="mgResult != null and mgResult != ''">
+				mg.mg_result=#{mgResult} AND
+			</if>
+			<if test="starGuessDate != null and starGuessDate != ''">
+				mg.mg_time<![CDATA[>=]]>#{starGuessDate} AND
+			</if>
+			<if test="endGuessDate != null and endGuessDate != ''">
+				mg.mg_time<![CDATA[<=]]>#{endGuessDate} AND
+			</if>
+			<if test="mId != null and mId != ''">
+				m.m_id=#{mId} AND
+			</if>
+			<if test="mAccountName != null and mAccountName != ''">
+				m.m_account_name LIKE CONCAT(CONCAT('%', #{mAccountName}), '%') AND
+			</if>
+		</trim>
+	</select>
+	
+	<select id="queryGuessTotal" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		SELECT COUNT(*) guessCount FROM tb_mb_guess
+	</select>
+	<select id="queryPledgeTotal" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		SELECT SUM(mg_bi_pledge) sumPledge FROM tb_mb_guess
+	</select>
+	<select id="queryAwardTotal" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		SELECT SUM(mg_bi_award) sumAward FROM tb_mb_guess
+	</select>
+	<select id="queryMemberTotal" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		SELECT COUNT(DISTINCT m_id) mCount FROM tb_mb_guess
+	</select>
+	
+	<select id="queryPledgeTotalByCondition" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		SELECT SUM(mg.mg_bi_pledge) sumPledge FROM tb_mb_guess mg 
+		LEFT JOIN tb_guess_project gp ON mg.gp_id = gp.gp_id
+		LEFT JOIN tb_member m ON mg.m_id = m.m_id
+		<trim prefix="WHERE" suffixOverrides="AND">  
+			<if test="id != null and id != ''">
+				mg.mg_id=#{id} AND
+			</if>
+			<if test="gpId != null and gpId != ''">
+				mg.gp_id=#{gpId} AND
+			</if>
+			<if test="gpName != null and gpName != ''">
+				gp.gp_name LIKE CONCAT(CONCAT('%', #{gpName}), '%') AND
+			</if>
+			<if test="starGameDate != null and starGameDate != ''">
+				gp.gp_game_star<![CDATA[>=]]>#{starGameDate} AND
+			</if>
+			<if test="endGameDate != null and endGameDate != ''">
+				gp.gp_game_star<![CDATA[<=]]>#{endGameDate} AND
+			</if>
+			<if test="mgResult != null and mgResult != ''">
+				mg.mg_result=#{mgResult} AND
+			</if>
+			<if test="starGuessDate != null and starGuessDate != ''">
+				mg.mg_time<![CDATA[>=]]>#{starGuessDate} AND
+			</if>
+			<if test="endGuessDate != null and endGuessDate != ''">
+				mg.mg_time<![CDATA[<=]]>#{endGuessDate} AND
+			</if>
+			<if test="mId != null and mId != ''">
+				m.m_id=#{mId} AND
+			</if>
+			<if test="mAccountName != null and mAccountName != ''">
+				m.m_account_name LIKE CONCAT(CONCAT('%', #{mAccountName}), '%') AND
+			</if>
+		</trim>
+	</select>
+	
+	<select id="queryAwardTotalByCondition" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		SELECT SUM(mg.mg_bi_award) sumAward FROM tb_mb_guess mg 
+		LEFT JOIN tb_guess_project gp ON mg.gp_id = gp.gp_id
+		LEFT JOIN tb_member m ON mg.m_id = m.m_id
+		<trim prefix="WHERE" suffixOverrides="AND">  
+			<if test="id != null and id != ''">
+				mg.mg_id=#{id} AND
+			</if>
+			<if test="gpId != null and gpId != ''">
+				mg.gp_id=#{gpId} AND
+			</if>
+			<if test="gpName != null and gpName != ''">
+				gp.gp_name LIKE CONCAT(CONCAT('%', #{gpName}), '%') AND
+			</if>
+			<if test="starGameDate != null and starGameDate != ''">
+				gp.gp_game_star<![CDATA[>=]]>#{starGameDate} AND
+			</if>
+			<if test="endGameDate != null and endGameDate != ''">
+				gp.gp_game_star<![CDATA[<=]]>#{endGameDate} AND
+			</if>
+			<if test="mgResult != null and mgResult != ''">
+				mg.mg_result=#{mgResult} AND
+			</if>
+			<if test="starGuessDate != null and starGuessDate != ''">
+				mg.mg_time<![CDATA[>=]]>#{starGuessDate} AND
+			</if>
+			<if test="endGuessDate != null and endGuessDate != ''">
+				mg.mg_time<![CDATA[<=]]>#{endGuessDate} AND
+			</if>
+			<if test="mId != null and mId != ''">
+				m.m_id=#{mId} AND
+			</if>
+			<if test="mAccountName != null and mAccountName != ''">
+				m.m_account_name LIKE CONCAT(CONCAT('%', #{mAccountName}), '%') AND
+			</if>
+		</trim>
+	</select>
+	
+	<select id="queryManTotalByCondition" parameterType="map" resultType="java.lang.String" flushCache="true" useCache="true">
+		SELECT SUM(mg.mg_bi_man) sumAward FROM tb_mb_guess mg 
+		LEFT JOIN tb_guess_project gp ON mg.gp_id = gp.gp_id
+		LEFT JOIN tb_member m ON mg.m_id = m.m_id
+		<trim prefix="WHERE" suffixOverrides="AND">  
+			<if test="id != null and id != ''">
+				mg.mg_id=#{id} AND
+			</if>
+			<if test="gpId != null and gpId != ''">
+				mg.gp_id=#{gpId} AND
+			</if>
+			<if test="gpName != null and gpName != ''">
+				gp.gp_name LIKE CONCAT(CONCAT('%', #{gpName}), '%') AND
+			</if>
+			<if test="starGameDate != null and starGameDate != ''">
+				gp.gp_game_star<![CDATA[>=]]>#{starGameDate} AND
+			</if>
+			<if test="endGameDate != null and endGameDate != ''">
+				gp.gp_game_star<![CDATA[<=]]>#{endGameDate} AND
+			</if>
+			<if test="mgResult != null and mgResult != ''">
+				mg.mg_result=#{mgResult} AND
+			</if>
+			<if test="starGuessDate != null and starGuessDate != ''">
+				mg.mg_time<![CDATA[>=]]>#{starGuessDate} AND
+			</if>
+			<if test="endGuessDate != null and endGuessDate != ''">
+				mg.mg_time<![CDATA[<=]]>#{endGuessDate} AND
+			</if>
+			<if test="mId != null and mId != ''">
+				m.m_id=#{mId} AND
+			</if>
+			<if test="mAccountName != null and mAccountName != ''">
+				m.m_account_name LIKE CONCAT(CONCAT('%', #{mAccountName}), '%') AND
+			</if>
+		</trim>
+	</select>
+</mapper>
